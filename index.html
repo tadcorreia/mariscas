@@ -1,0 +1,261 @@
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POV Cinematic Experience</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap');
+
+        :root {
+            --cinematic-easing: cubic-bezier(0.25, 0.1, 0.25, 1);
+            --transition-speed: 1000ms;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            user-select: none;
+        }
+
+        #video-viewport {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            overflow: hidden;
+        }
+
+        video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity var(--transition-speed) var(--cinematic-easing);
+            pointer-events: none;
+        }
+
+        .v-hidden { opacity: 0; }
+        .v-visible { opacity: 1; }
+
+        #scrim {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 35%, transparent 65%),
+                        linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 25%);
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        /* Cinematic Left-Aligned UI */
+        #ui-layer {
+            position: fixed;
+            bottom: 12%;
+            left: 8vw;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            transition: opacity var(--transition-speed), transform var(--transition-speed);
+        }
+
+        .narrative-container {
+            max-width: 520px;
+            margin-bottom: 3rem;
+        }
+
+        .speaker {
+            display: block;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5em;
+            opacity: 0.3;
+            margin-bottom: 1.2rem;
+            font-weight: 400;
+        }
+
+        .narrative-text {
+            font-size: 1.3rem;
+            font-weight: 200;
+            line-height: 1.8;
+            letter-spacing: 0.01em;
+            opacity: 0.85;
+            text-align: left;
+        }
+
+        /* Choice Items in Row */
+        .choices-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: row;
+            gap: 3.5rem;
+            align-items: center;
+        }
+
+        .choice-item {
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 300;
+            opacity: 0.3;
+            transition: all 600ms var(--cinematic-easing);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            position: relative;
+        }
+
+        .choice-item:hover {
+            opacity: 1;
+            transform: translateY(-3px);
+        }
+
+        .choice-item::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: #fff;
+            transition: width 600ms var(--cinematic-easing);
+            opacity: 0.4;
+        }
+
+        .choice-item:hover::after {
+            width: 100%;
+        }
+
+        .choice-number {
+            font-size: 0.6rem;
+            opacity: 0.4;
+        }
+
+        /* Back Button - Top Left */
+        #back-nav {
+            position: fixed;
+            top: 3.5rem;
+            left: 3.5rem;
+            z-index: 30;
+            opacity: 0.2;
+            cursor: pointer;
+            transition: opacity 400ms, transform 400ms;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+        }
+
+        #back-nav:hover { opacity: 0.9; transform: translateX(-5px); }
+
+        /* Animated Initial Menu */
+        .initial-menu {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1.5s var(--cinematic-easing);
+        }
+
+        .menu-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, #111 0%, #000 100%);
+            z-index: -1;
+            animation: breathe 15s infinite alternate ease-in-out;
+        }
+
+        @keyframes breathe {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.15); opacity: 0.8; }
+        }
+
+        .btn-menu {
+            background: none;
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #fff;
+            padding: 1.2rem 3.5rem;
+            font-size: 0.75rem;
+            font-weight: 200;
+            cursor: pointer;
+            transition: all 600ms var(--cinematic-easing);
+            letter-spacing: 0.5em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .btn-menu:hover {
+            border-color: rgba(255,255,255,0.4);
+            letter-spacing: 0.7em;
+            background: rgba(255,255,255,0.02);
+        }
+
+        .hidden { display: none !important; }
+
+        #autoplay-guard {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="video-viewport">
+        <video id="v1" playsinline muted loop class="v-visible" crossorigin="anonymous"></video>
+        <video id="v2" playsinline muted loop class="v-hidden" crossorigin="anonymous"></video>
+    </div>
+
+    <div id="scrim"></div>
+    
+    <div id="back-nav" class="hidden" onclick="app.goBack()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span>Voltar</span>
+    </div>
+
+    <main id="ui-layer" class="opacity-0">
+        <div class="narrative-container">
+            <span id="speaker" class="speaker"></span>
+            <div id="narrative" class="narrative-text"></div>
+        </div>
+        <ul id="choices" class="choices-list"></ul>
+    </main>
+
+    <div id="initial-menu" class="initial-menu">
+        <div class="menu-bg"></div>
+        <h1 class="text-6xl font-extralight tracking-[0.4em] mb-2 opacity-70">Touros e Mariscas</h1>
+        <p class="text-[0.5rem] tracking-[0.8em] opacity-20 mb-20 uppercase">Interactive POV Narrative</p>
+        <div id="story-list" class="flex flex-col items-center"></div>
+    </div>
+
+    <div id="autoplay-guard" class="hidden" onclick="app.unlockAudio()">
+        <span class="text-[0.6rem] tracking-[0.5em] opacity-30 uppercase">Clique para Ativar Som</span>
+    </div>
+
+    <script src="Storage.js"></script>
+    <script src="VideoManager.js"></script>
+    <script src="UIManager.js"></script>
+    <script src="StoryEngine.js"></script>
+    <script src="stories.js"></script>
+    <script src="index.js"></script>
+</body>
+</html>
